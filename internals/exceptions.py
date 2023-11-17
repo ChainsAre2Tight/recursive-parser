@@ -8,3 +8,6 @@ class UnknownBrowserError(Exception):
 
 class UnknownRequestTypeError(Exception):
     pass
+
+class PageCouldntBeReachedError(Exception):
+    pass
