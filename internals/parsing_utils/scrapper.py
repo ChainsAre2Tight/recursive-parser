@@ -1,6 +1,6 @@
 import urllib3
 
-from objects import Page, Form, Field, Cookie, CookieSource, ReferencedObject
+from internals.objects import Page, Form, Field, Cookie, CookieSource, ReferencedObject
 from bs4 import BeautifulSoup
 
 import requests

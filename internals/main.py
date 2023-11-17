@@ -1,7 +1,6 @@
-from internals.parser import Parser
-from internals.scrapper import Scrapper
+from internals.parsing_utils.parser import Parser
+from internals.parsing_utils.scrapper import Scrapper
 from internals.configuration import ConfigParser
-import requests
 
 
 def main():
