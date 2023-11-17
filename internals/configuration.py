@@ -9,6 +9,8 @@ class Config:
     start_page: str  # Where to start scraping
     maximum_recursion_depth: int  # Maximum recursion dept when performing recursion search
     browser: str  # Chrome or Firefox
+    wait_time: int  # how much time to give each page to load
+    printout: bool  # if eventhandler should print everything
 
 
 class ConfigParser:
@@ -34,9 +36,19 @@ class ConfigParser:
             if my_config.browser not in ['Firefox', 'Chrome']:
                 raise UnknownBrowserError('Browser should be either Chrome or Firefox')
             eventhandler.new_event("Browser is valid")
+            if my_config.wait_time < 0:
+                raise ValueError("Wait time must be non-negative")
+            elif my_config.wait_time > 60:
+                eventhandler.new_event("Wait time should be lower than 60")
+            eventhandler.new_event("Wait time is valid")
+
+            if type(my_config.printout) != bool:
+                raise TypeError("Printout should be either True or False")
 
             # return config object
             eventhandler.new_status("Successfully loaded config")
+            if not my_config.printout:
+                eventhandler.printout = False
             return my_config
         except ImportError:
             raise ConfigNotFoundError("Missing config definition for app/config.py")

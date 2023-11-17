@@ -6,6 +6,7 @@ import selenium.common.exceptions
 from internals.exceptions import UnknownRequestTypeError, UnknownBrowserError, PageCouldntBeReachedError
 from internals.handlers import eventhandler
 import time
+from internals.timeout import timeout, MyTimeout
 
 
 class Parser:
@@ -15,6 +16,7 @@ class Parser:
         start_time = time.time()
 
         def set_options(options_obj):
+            pass
             options_obj.add_argument('--headless')
             # options_obj.add_argument('window-size=1920x1080')
             # options_obj.add_argument("disable-gpu")
@@ -41,7 +43,12 @@ class Parser:
     def __del__(self):
         self.driver.close()
 
-    def parse_page(self, link: str, method="GET") -> tuple[BeautifulSoup, list[dict]]:
+    @timeout(60)
+    def parse_page(self, link: str, method="GET", sleep_time: int = 0) -> tuple[BeautifulSoup, list[dict]]:
+        if sleep_time > 0:
+            eventhandler.new_status(f"Sleeping for {sleep_time} seconds...")
+            time.sleep(sleep_time)
+            eventhandler.new_status(f'Slept for {sleep_time} seconds, now back to parsing')
         start_time = time.time()
         if method == "GET":
             eventhandler.new_status(f'Trying to GET page at {link}  ...')

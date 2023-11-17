@@ -5,20 +5,31 @@ import requests
 import time
 
 from internals.handlers import eventhandler
+from internals.exceptions import PageCouldntBeReachedError
+from internals.timeout import timeout, MyTimeout
 
 
+@timeout(3)
 def get_content_type(url):
-    response = requests.head(url)
-    return response.headers['Content-Type']
+    try:
+        response = requests.head(url)
+        return response.headers['Content-Type']
+    except MyTimeout as er:
+        raise er
+    except Exception as er:
+        raise PageCouldntBeReachedError(er.args)
 
 
 class Scrapper:
     @staticmethod
-    def scrap(soup: BeautifulSoup, address: str, cookies: dict) -> Page:
+    def scrap(soup: BeautifulSoup, address: str, cookies: dict, known_links: dict[str]) -> Page:
         start_time = time.time()
         eventhandler.new_status(f"Scrappring {address} ...")
         # get title
-        title = soup.find("title").string
+        try:
+            title = soup.find("title").string
+        except AttributeError:
+            title = 'No title found'
 
         # get links
         eventhandler.new_status("Scrapping links")
@@ -30,11 +41,27 @@ class Scrapper:
             if item[:4] != 'http' and item[0] == '/':
                 link = address + item[1:]
 
-            if link.count('/') >= 3 and link.rfind('.') > link.rfind('/'):
-                guessed_type = get_content_type(link)
+            if 1 or (link.count('/') >= 3 and link.rfind('.') > link.rfind('/')):
+
+                if link not in known_links.keys():
+                    guessed_type = 'Unknown/???'
+                    try:
+                        guessed_type = get_content_type(link)
+                        if type(guessed_type) == PageCouldntBeReachedError:
+                            guessed_type = 'Unknown/Unreachable'
+                    except PageCouldntBeReachedError:
+                        eventhandler.new_error(f"Couldn't reach {link}. Skipping")
+                        guessed_type = 'Unknown/Unreachable'
+                    except MyTimeout:
+                        eventhandler.new_error(f"Reached timeout wile trying to access {link}. Skipping")
+                        guessed_type = 'Unknown/Timeout'
+                    known_links[link] = guessed_type
+                else:
+                    guessed_type = known_links[link]
 
                 if 'text/html' in guessed_type:
-                    eventhandler.new_info(f"Link {link} that was expected to lead to a file leads to a page instead")
+                    eventhandler.new_info(
+                        f"Link {link} that was expected to lead to a file leads to a page instead")
                     links.append(link)
                 else:
                     eventhandler.new_info(f'Link {link} leads to a file ({guessed_type})')
@@ -42,6 +69,7 @@ class Scrapper:
                         link=link,
                         object_type=guessed_type,
                     ))
+
             else:
                 eventhandler.new_info(f"Link {link} leads to a page")
                 links.append(link)
@@ -73,5 +101,6 @@ class Scrapper:
         )
 
         # return it
-        eventhandler.new_status(f"Successfully scrapped page at {address} in {round(time.time() - start_time, 3)} seconds")
+        eventhandler.new_status(
+            f"Successfully scrapped page at {address} in {round(time.time() - start_time, 3)} seconds")
         return page
