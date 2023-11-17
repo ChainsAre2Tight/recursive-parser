@@ -1,14 +1,13 @@
 from dataclasses import dataclass
 
+from internals.exceptions import UnknownBrowserError, ConfigNotFoundError
+
 
 @dataclass
 class Config:
     start_page: str  # Where to start scraping
     maximum_recursion_depth: int  # Maximum recursion dept when performing recursion search
-
-
-class ConfigNotFoundError(Exception):
-    pass
+    browser: str  # Chrome or Firefox
 
 
 class ConfigParser:
@@ -27,6 +26,8 @@ class ConfigParser:
             # Here be config validations
             if my_config.maximum_recursion_depth < 0:
                 raise ValueError("Recursion depth should be non-negative")
+            if my_config.browser not in ['Firefox', 'Chrome']:
+                raise UnknownBrowserError('Browser should be either Chrome or Firefox')
 
             # return config object
             return my_config

@@ -7,13 +7,12 @@ import requests
 def main():
     config = ConfigParser.parse()
     link = config.start_page
+    browser = config.browser
 
-    session = requests.session()
-    soup, cookies = Parser.parse_page(link, method="GET", session=session)
+    soup, cookies = Parser(browser=browser, wait_time=10).parse_page(link, method="GET")
     page = Scrapper.scrap(soup, link, cookies)
 
     print(page)
-    print(cookies)
 
 
 if __name__ == "__main__":

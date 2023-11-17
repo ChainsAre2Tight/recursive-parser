@@ -21,9 +21,21 @@ class Cookie:
 
 
 @dataclass
+class CookieSource:
+    cookies: list[Cookie]
+
+
+@dataclass
+class ReferencedObject:
+    link: str
+    object_type: str
+
+
+@dataclass
 class Page:
     title: str  # Title of said page
     address: str  # link to this page
     forms: list[Form]  # list of forms that are found on a page
-    cookies: list[Cookie]  # list of cookies that are found on a page
+    cookies: list[CookieSource]  # list of cookies that are found on a page
     links: list[str]  # list of links to other pages that are found on a page
+    objects: list[ReferencedObject]  # list of all objects that are referenced on a page (eg. /static/img.png)
