@@ -39,3 +39,7 @@ class Page:
     cookies: list[CookieSource]  # list of cookies that are found on a page
     links: list[str]  # list of links to other pages that are found on a page
     objects: list[ReferencedObject]  # list of all objects that are referenced on a page (eg. /static/img.png)
+    unreachable: list[ReferencedObject]  # links that cannot be accessed
+
+    def to_html(self):
+        return f'''{str(self)}'''

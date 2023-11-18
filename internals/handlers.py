@@ -1,13 +1,15 @@
 from dataclasses import dataclass
+from datetime import datetime
 
 
 @dataclass
 class _Event:
+    timestamp: str
     name: str
     description: str
 
     def __str__(self):
-        return f'{self.name}: {self.description}'
+        return f'> {self.timestamp} {self.name}: {self.description}'
 
 
 @dataclass
@@ -20,7 +22,8 @@ class _EventHandler:
         self.events = list()
 
     def _add_event(self, event_name: str, description: str):
-        event = _Event(name=event_name, description=description)
+        timestamp = datetime.time(datetime.now())
+        event = _Event(name=event_name, description=description, timestamp=timestamp)
         self.events.append(event)
 
         if self.printout:

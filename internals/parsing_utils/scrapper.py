@@ -3,13 +3,14 @@ from bs4 import BeautifulSoup
 
 import requests
 import time
+import urllib.parse
 
 from internals.handlers import eventhandler
 from internals.exceptions import PageCouldntBeReachedError
 from internals.timeout import timeout, MyTimeout
 
 
-@timeout(3)
+@timeout(2)
 def get_content_type(url):
     try:
         response = requests.head(url)
@@ -36,15 +37,17 @@ class Scrapper:
         all_links = list(map(lambda x: x['href'], soup.find_all(href=True)))
         links = list()
         objects = list()
+        unreachable = list()
         for item in all_links:
             link = item
             if item[:4] != 'http' and item[0] == '/':
-                link = address + item[1:]
+                # link = address + item[1:]
+                link = urllib.parse.urljoin(address, link)
 
-            if 1 or (link.count('/') >= 3 and link.rfind('.') > link.rfind('/')):
+            if 0 or (link.count('/') >= 3 and link.rfind('.') > link.rfind('/') and link[-4:] not in [".php", 'html']):
 
                 if link not in known_links.keys():
-                    guessed_type = 'Unknown/???'
+                    guessed_type = 'Unknown/'
                     try:
                         guessed_type = get_content_type(link)
                         if type(guessed_type) == PageCouldntBeReachedError:
@@ -63,9 +66,15 @@ class Scrapper:
                     eventhandler.new_info(
                         f"Link {link} that was expected to lead to a file leads to a page instead")
                     links.append(link)
-                else:
+                elif "Unknown" not in guessed_type:
                     eventhandler.new_info(f'Link {link} leads to a file ({guessed_type})')
                     objects.append(ReferencedObject(
+                        link=link,
+                        object_type=guessed_type,
+                    ))
+                else:
+                    eventhandler.new_info(f"Link {link} couldn't be reached ({guessed_type})")
+                    unreachable.append(ReferencedObject(
                         link=link,
                         object_type=guessed_type,
                     ))
@@ -98,6 +107,7 @@ class Scrapper:
             objects=objects,
             forms=forms,
             cookies=cookie_sources,
+            unreachable=unreachable,
         )
 
         # return it

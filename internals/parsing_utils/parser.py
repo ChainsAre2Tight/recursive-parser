@@ -43,7 +43,7 @@ class Parser:
     def __del__(self):
         self.driver.close()
 
-    @timeout(60)
+    @timeout(30)
     def parse_page(self, link: str, method="GET", sleep_time: int = 0) -> tuple[BeautifulSoup, list[dict]]:
         if sleep_time > 0:
             eventhandler.new_status(f"Sleeping for {sleep_time} seconds...")
