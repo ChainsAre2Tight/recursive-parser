@@ -7,7 +7,10 @@ from internals.exceptions import UnknownRequestTypeError, UnknownBrowserError, P
 from internals.handlers import eventhandler
 import time
 from internals.timeout import timeout, MyTimeout
+from internals.objects import Page
 
+from internals.visualisation.graph_builder import same_website
+from internals.parsing_utils.scrapper import Scrapper
 
 class Parser:
 
@@ -74,6 +77,37 @@ class Parser:
         cookies = self.driver.get_cookies()
         eventhandler.new_status("Successfully got soup and cookies of this page")
         return soup, cookies
+
+    def recursive_parse(self, link, ttl: int, parsed_pages: dict[Page], sleep_time: int,
+                        known_links: dict[str], mode: str = 'normal'):
+        if ttl > 0:
+            try:
+                try:
+                    soup, cookies = self.parse_page(link, method="GET", sleep_time=sleep_time)
+                    print(cookies)
+                except TypeError:
+                    raise PageCouldntBeReachedError
+                page = Scrapper.scrap(soup, link, cookies, known_links)
+                parsed_pages[link] = page
+
+                for sub_page in page.links:
+                    if mode == 'strict' and not same_website(link, sub_page):
+                        continue
+                    if sub_page not in parsed_pages.keys():
+                        self.recursive_parse(
+                            link=sub_page,
+                            ttl=ttl - 1,
+                            parsed_pages=parsed_pages,
+                            sleep_time=sleep_time,
+                            known_links=known_links,
+                            mode=mode,
+                        )
+            except MyTimeout:
+                eventhandler.new_error(f"Timeout when trying to parse {link}. Skipping")
+                parsed_pages[link] = link
+            except PageCouldntBeReachedError:
+                eventhandler.new_error(f"Couldn't reach {link}. Skipping")
+                parsed_pages[link] = link
 
 
 if __name__ == "__main__":

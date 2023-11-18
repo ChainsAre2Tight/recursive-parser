@@ -14,7 +14,7 @@ config = Config(
     browser='Firefox',
     wait_time=15,
     printout=True,
-    pickle_dump_file_name='./data/pickle_test',
+    pickle_dump_file_name='./data/pickle_test_1',
     graph_file_name='result_test.html',
     mode='strict',
 )
