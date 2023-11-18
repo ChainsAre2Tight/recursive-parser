@@ -38,11 +38,9 @@ class Scrapper:
         links = list()
         objects = list()
         unreachable = list()
-        for item in all_links:
-            link = item
+        for link in all_links:
             try:
-                if item[:4] != 'http' and item[0] == '/':
-                    # link = address + item[1:]
+                if link[:4] != 'http' and link[0] == '/':
                     link = urllib.parse.urljoin(address, link)
             except IndexError:
                 continue
