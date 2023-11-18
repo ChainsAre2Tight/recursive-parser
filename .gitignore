@@ -17,3 +17,5 @@ logs/*
 data/*
 !data/.gitkeep
 
+*.html
+
