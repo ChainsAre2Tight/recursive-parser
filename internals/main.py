@@ -7,8 +7,7 @@ from internals.handlers import eventhandler
 from internals.exceptions import PageCouldntBeReachedError
 from internals.objects import Page
 from internals.visualisation.graph_builder import GraphBuilder
-import networkx as nx
-import pyvis.network
+import pickle
 
 from internals.timeout import MyTimeout
 
@@ -64,7 +63,7 @@ def recursive_parse(link, ttl: int, parser: Parser, parsed_pages: dict[Page], sl
             parsed_pages[link] = link
 
 
-def main():
+def perform_parsing():
     start_time = time.time()
 
     config = ConfigParser.parse()
@@ -78,10 +77,7 @@ def main():
     parsed_pages: dict[Page | str] = dict()
     known_links = dict()
 
-    if 1:
-        pass
     try:
-
         recursive_parse(
             link=link,
             ttl=config.maximum_recursion_depth,
@@ -96,11 +92,35 @@ def main():
         raise er
     finally:
         eventhandler.new_info(f"Finished in {round(time.time() - start_time, 3)} seconds")
-        # print("Events: ", *eventhandler.events, sep='\n    ')
-        graph, nodes = GraphBuilder.graph_from_parsed_pages(parsed_pages)
-        GraphBuilder.export_graph(graph, nodes, "result.html")
 
+        eventhandler.new_status(f"Dumping parsed data to {config.pickle_dump_file_name}...")
+        with open(config.pickle_dump_file_name, 'wb') as f:
+            pickle.dump(parsed_pages, f, pickle.HIGHEST_PROTOCOL)
+            eventhandler.new_status(f'Dump successful')
+            del parsed_pages
+
+
+def construct_graph():
+    config = ConfigParser.parse()
+    eventhandler.new_status(f"Trying to read data from {config.pickle_dump_file_name}...")
+
+    with open(config.pickle_dump_file_name, 'rb') as f:
+        parsed_pages = pickle.load(f)
+
+    eventhandler.new_status(f"Successfully read dump, {len(parsed_pages.keys())} pages loaded")
+
+    eventhandler.new_status(f'Building graph...')
+    graph, nodes = GraphBuilder.graph_from_parsed_pages(parsed_pages)
+    eventhandler.new_status("Graph successfully built")
+
+    eventhandler.new_status(f'Exporting graph to {config.graph_file_name}...')
+    GraphBuilder.export_graph(graph, nodes, config.graph_file_name)
+    eventhandler.new_status(f'Graph exported. All clear')
 
 
 if __name__ == "__main__":
-    main()
+    # perform_parsing()
+
+    construct_graph()
+
+    pass

@@ -11,6 +11,10 @@ class Config:
     browser: str  # Chrome or Firefox
     wait_time: int  # how much time to give each page to load
     printout: bool  # if eventhandler should print everything
+    mode: str  # strict or normal
+    graph_file_name: str
+    pickle_dump_file_name: str
+
 
 
 class ConfigParser:
@@ -44,6 +48,8 @@ class ConfigParser:
 
             if type(my_config.printout) != bool:
                 raise TypeError("Printout should be either True or False")
+
+
 
             # return config object
             eventhandler.new_status("Successfully loaded config")
