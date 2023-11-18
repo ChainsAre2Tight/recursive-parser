@@ -1,8 +1,9 @@
 from internals.configuration import ConfigParser
 from internals.routines import perform_parsing_routine, construct_graph_routine
+from internals.handlers import eventhandler
 import sys
 
-sys.setrecursionlimit(100000)
+sys.setrecursionlimit(1000)
 
 
 def main():
@@ -15,6 +16,8 @@ def main():
         construct_graph_routine(config)
     else:
         print('Unknown task. Leaving.')
+
+    eventhandler.__del__()
 
 
 if __name__ == '__main__':

@@ -40,9 +40,12 @@ class Scrapper:
         unreachable = list()
         for item in all_links:
             link = item
-            if item[:4] != 'http' and item[0] == '/':
-                # link = address + item[1:]
-                link = urllib.parse.urljoin(address, link)
+            try:
+                if item[:4] != 'http' and item[0] == '/':
+                    # link = address + item[1:]
+                    link = urllib.parse.urljoin(address, link)
+            except IndexError:
+                continue
 
             if 0 or (link.count('/') >= 3 and link.rfind('.') > link.rfind('/') and link[-4:] not in [".php", 'html']):
 

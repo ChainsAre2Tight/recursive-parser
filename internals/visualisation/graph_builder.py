@@ -38,7 +38,7 @@ class NodeInfo:
 class GraphBuilder:
 
     @staticmethod
-    def graph_from_parsed_pages(parsed_pages: dict[str]) -> tuple[nx.Graph, dict[NodeInfo]]:
+    def graph_from_parsed_pages(parsed_pages: dict[str], export_cookies: bool) -> tuple[nx.Graph, dict[NodeInfo]]:
         graph = nx.Graph()
         nodes = dict()
 
@@ -114,17 +114,18 @@ class GraphBuilder:
                 graph.add_edge(page, name)
 
             # add node for cookies
-            if len(parsed_pages[page].cookies) > 1:
-                name = f'Cookies | {page}'
-                graph.add_node(name)
-                nodes[name] = NodeInfo(
-                    node=name,
-                    title=name,
-                    color='pink',
-                    shape='star',
-                    size=10
-                )
-                graph.add_edge(page, name)
+            if export_cookies:
+                if len(parsed_pages[page].cookies) > 1:
+                    name = f'Cookies | {page}'
+                    graph.add_node(name)
+                    nodes[name] = NodeInfo(
+                        node=name,
+                        title=name,
+                        color='pink',
+                        shape='star',
+                        size=10
+                    )
+                    graph.add_edge(page, name)
 
             # add node for forms
             # add node for ...
@@ -194,36 +195,41 @@ class GraphBuilder:
                 graph.add_edge(f"Unreachable | {page}" if len(parsed_pages[page].unreachable) > 1 else page, name)
 
             # add links to cookies
-            for i_cookie_source in range(len(parsed_pages[page].cookies)):
-                source_name = f'{i_cookie_source} | Cookies | {page}'
-                if source_name not in nodes.keys():
-                    graph.add_node(source_name)
-                    nodes[source_name] = NodeInfo(
-                        node=source_name,
-                        title=source_name,
-                        color='brown',
-                        shape='triangle',
-                        size=20
-                    )
-                    graph.add_edge(f'Cookies | {page}' if len(parsed_pages[page].cookies) > 1 else page, source_name)
-                    for cookie in parsed_pages[page].cookies[i_cookie_source].cookies:
-                        name = f'{cookie.name} | {cookie.value}'
-                        graph.add_node(name)
-                        nodes[name] = NodeInfo(
-                            node=name,
-                            title=name,
-                            color='orange',
-                            shape='dot',
+            if export_cookies:
+                for i_cookie_source in range(len(parsed_pages[page].cookies)):
+                    source_name = f'{i_cookie_source} | Cookies | {page}'
+                    if source_name not in nodes.keys():
+                        graph.add_node(source_name)
+                        nodes[source_name] = NodeInfo(
+                            node=source_name,
+                            title=source_name,
+                            color='brown',
+                            shape='triangle',
                             size=20
                         )
-                        graph.add_edge(source_name if len(parsed_pages[page].cookies[i_cookie_source].cookies) > 1 else page, name)
+                        graph.add_edge(f'Cookies | {page}' if len(parsed_pages[page].cookies) > 1 else page,
+                                       source_name)
+                        for cookie in parsed_pages[page].cookies[i_cookie_source].cookies:
+                            name = f'{cookie.name} | {cookie.value}'
+                            graph.add_node(name)
+                            nodes[name] = NodeInfo(
+                                node=name,
+                                title=name,
+                                color='orange',
+                                shape='dot',
+                                size=20
+                            )
+                            graph.add_edge(
+                                source_name if len(parsed_pages[page].cookies[i_cookie_source].cookies) > 1 else page,
+                                name)
 
         return graph, nodes
 
     @staticmethod
     def export_graph(graph: nx.Graph, nodes: dict[NodeInfo], file_name: str = "graph.html"):
         net = pyvis.network.Network(notebook=True, font_color='#10000000', bgcolor="#222222", height=1000)
-        net.barnes_hut(gravity=-15000, central_gravity=0.3, spring_length=100, spring_strength=0.05, damping=0.1, overlap=0)
+        net.barnes_hut(gravity=-15000, central_gravity=0.3, spring_length=100, spring_strength=0.05, damping=0.1,
+                       overlap=0)
 
         # Construct nodes
         for link, node in nodes.items():
@@ -235,6 +241,7 @@ class GraphBuilder:
 
         net.show_buttons(filter_=['physics'])
         net.show(file_name)
+
 
 if __name__ == '__main__':
     print(same_website(

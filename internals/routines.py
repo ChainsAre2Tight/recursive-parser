@@ -67,7 +67,7 @@ def construct_graph_routine(config):
         eventhandler.new_info(f"Read {num_of_pages_loaded} page{'s' if num_of_pages_loaded > 1 else ''}")
 
         eventhandler.new_status(f'Building graph...')
-        graph, nodes = GraphBuilder.graph_from_parsed_pages(parsed_pages)
+        graph, nodes = GraphBuilder.graph_from_parsed_pages(parsed_pages, export_cookies=config.cookies)
         eventhandler.new_status("Graph successfully built")
 
         eventhandler.new_status(f'Exporting graph to {config.graph_file_name}...')

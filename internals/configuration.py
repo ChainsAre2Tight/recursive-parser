@@ -14,7 +14,8 @@ class Config:
     mode: str  # strict or normal
     graph_file_name: str
     pickle_dump_file_name: str
-
+    cookies: bool
+    log: bool
 
 
 class ConfigParser:
@@ -49,12 +50,15 @@ class ConfigParser:
             if type(my_config.printout) != bool:
                 raise TypeError("Printout should be either True or False")
 
-
-
             # return config object
             eventhandler.new_status("Successfully loaded config")
             if not my_config.printout:
+                eventhandler.new_info("Printing is disabled")
                 eventhandler.printout = False
+            if not my_config.log:
+                eventhandler.new_info("Logging is disabled. Config ends here")
+                eventhandler.write = False
+
             return my_config
         except ImportError:
             raise ConfigNotFoundError("Missing config definition for app/config.py")
