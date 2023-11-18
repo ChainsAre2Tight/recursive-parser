@@ -14,7 +14,16 @@ def obj_node(name):
 
 
 def same_website(link1: str, link2: str) -> bool:
-    return link1[link1.find('/') + 2:].split('/')[0] == link2[link2.find('/') + 2:].split('/')[0]
+    def transform(link: str) -> str:
+        link = link[link.find('/') + 2:]  # get rid of http:// and http://
+        link = link.strip('www.')  # get rid of www.
+        link = link.split('/')[0]  # get only host
+
+        if link.count('.') > 1:
+            link = '.'.join(link.split('.')[-2:])  # get rid of subdomains
+        return link
+
+    return transform(link1) == transform(link2)
 
 
 @dataclass
@@ -58,16 +67,25 @@ class GraphBuilder:
 
             # add node for links
             if len(parsed_pages[page].links) > 1:
-                name = link_node(page)
-                graph.add_node(name)
-                nodes[name] = NodeInfo(
-                    node=name,
-                    title=name,
-                    color='yellow',
-                    shape='star',
-                    size=10
-                )
-                graph.add_edge(page, name)
+
+                # check if all links have left unscrapped
+                # This
+                flag = True
+                for link_to_check in parsed_pages[page].links:
+                    if link_to_check not in parsed_pages.keys():
+                        flag = False
+
+                if not flag:
+                    name = link_node(page)
+                    graph.add_node(name)
+                    nodes[name] = NodeInfo(
+                        node=name,
+                        title=name,
+                        color='yellow',
+                        shape='star',
+                        size=10
+                    )
+                    graph.add_edge(page, name)
 
             # add node for objects
             if len(parsed_pages[page].objects) > 1:
@@ -217,3 +235,17 @@ class GraphBuilder:
 
         net.show_buttons(filter_=['physics'])
         net.show(file_name)
+
+if __name__ == '__main__':
+    print(same_website(
+        'https://www.example.com/',
+        'http://example.com/'
+    ))
+    print(same_website(
+        'https://www.example.com/',
+        'https://example.ru/'
+    ))
+    print(same_website(
+        'https://www.example.com/',
+        'https://lox.example.com/'
+    ))
