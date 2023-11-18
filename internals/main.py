@@ -12,6 +12,8 @@ import pyvis.network
 
 from internals.timeout import MyTimeout
 
+from internals.visualisation.graph_builder import same_website
+
 
 def main_0():
     try:
@@ -30,17 +32,20 @@ def main_0():
 
 
 def recursive_parse(link, ttl: int, parser: Parser, parsed_pages: dict[Page], sleep_time: int,
-                    known_links: dict[str]):
+                    known_links: dict[str], mode: str = 'normal'):
     if ttl > 0:
         try:
             try:
                 soup, cookies = parser.parse_page(link, method="GET", sleep_time=sleep_time)
+                print(cookies)
             except TypeError:
                 raise PageCouldntBeReachedError
             page = Scrapper.scrap(soup, link, cookies, known_links)
             parsed_pages[link] = page
 
             for sub_page in page.links:
+                if mode == 'strict' and not same_website(link, sub_page):
+                    continue
                 if sub_page not in parsed_pages.keys():
                     recursive_parse(
                         link=sub_page,
@@ -49,6 +54,7 @@ def recursive_parse(link, ttl: int, parser: Parser, parsed_pages: dict[Page], sl
                         parsed_pages=parsed_pages,
                         sleep_time=sleep_time,
                         known_links=known_links,
+                        mode=mode,
                     )
         except MyTimeout:
             eventhandler.new_error(f"Timeout when trying to parse {link}. Skipping")
@@ -81,8 +87,9 @@ def main():
             ttl=config.maximum_recursion_depth,
             parser=parser,
             parsed_pages=parsed_pages,
-            sleep_time=5,
+            sleep_time=1,
             known_links=known_links,
+            mode='strict',
         )
         eventhandler.new_info('All clear')
     except Exception as er:
