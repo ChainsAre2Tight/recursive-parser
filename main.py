@@ -1,5 +1,8 @@
 from internals.configuration import ConfigParser
-from internals.main import perform_parsing, construct_graph
+from internals.routines import perform_parsing_routine, construct_graph_routine
+import sys
+
+sys.setrecursionlimit(100000)
 
 
 def main():
@@ -7,9 +10,9 @@ def main():
 
     task = input("? What task to perform? parse/export\n< ")
     if task == 'parse':
-        perform_parsing(config)
+        perform_parsing_routine(config)
     elif task == 'export':
-        construct_graph(config)
+        construct_graph_routine(config)
     else:
         print('Unknown task. Leaving.')
 
