@@ -10,7 +10,10 @@ gen
 venv
 results
 lib
-!logs/.gitkeep
+
 logs/*
-!data/.gitkeep
+!logs/.gitkeep
+
 data/*
+!data/.gitkeep
+
