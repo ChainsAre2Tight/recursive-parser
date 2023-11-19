@@ -1,26 +1,26 @@
 from internals.configuration import Config
 
 config = Config(
-    # start_page="https://example.com",
-    # start_page='https://codeby.games/categories/web/cdd2d7e7-495e-4a14-b0ea-cae75b7b21a3',
-    # start_page='http://62.173.140.174:16000/',
-    # start_page='https://www.wolframalpha.com/',
-    # start_page='https://palchevsky.ru/',
-    # start_page='https://palchevsky.ru/awards.php',
-    # start_page='https://palchevsky.ru/r.php?r=https://www.elibrary.ru/item.asp?id=38251321',
-    # start_page='https://gettransfer.com/ru',
-    # start_page='https://mephi.ru/',
-    # start_page='https://www.xvideos.com/',
-    # start_page='https://vk.com/wtblog',
-    # start_page='https://www.desmos.com/calculator?lang=ru',
-    start_page='https://dashakudryavtseva.com/',
-    maximum_recursion_depth=3,
+    start_page="https://example.com",
+    # what page should be scanned
+    maximum_recursion_depth=1,
+    # Maximum depth the parser is allowed (e.g. l1 will scan only the first page, l2 all the links found in l1 scan
     browser='Firefox',
+    # Browser (Chrome or Firefox)
     wait_time=15,
+    # How long till browser assumes page is fully loaded
     printout=True,
+    # Whether to print all events into console
     log=False,
-    pickle_dump_file_name='./data/pickle_blog-l3',
-    graph_file_name='result_blog-l3.html',
-    mode='strict',
-    cookies=False,
+    # Whether to log all events to logging file
+    pickle_dump_file_name='auto',
+    graph_file_name='auto',
+    # File names that will be used to store data. Set to 'auto' for automatic generation based on start_page
+    mode='semi-strict',
+    # normal - scan all links regardless of where they might lead
+    # semi-strict - scan all links on the same website e.g. uk.example.com is considered the same website as example.com
+    # strict - only the exact domain will be scanned
+    cookies=True,
+    # If set to False, parser will still try to access cookies but graphs built in this mode will not include them
+    # set this to False for scans all scans whose depth exceed 2 as the graph will be bloated with cookie data
 )
