@@ -7,6 +7,13 @@ def construct_file_name_from_link(link: str, prefix: str = '', postfix: str = ''
     return f'{prefix}-{link}-{postfix}'
 
 
+def validate_file_name(name: str) -> bool:
+    for char in r'/\*&?.,$#@':
+        if char in name:
+            return False
+    return True
+
+
 if __name__ == "__main__":
     print(
         construct_file_name_from_link(

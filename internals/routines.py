@@ -39,9 +39,10 @@ def perform_parsing_routine(config):
         finally:
             eventhandler.new_info(f"Finished in {round(time.time() - start_time, 3)} seconds")
 
-            eventhandler.new_status(f"Dumping parsed data to {config.pickle_dump_file_name}...")
-            print(parsed_pages)
-            with open(config.pickle_dump_file_name, 'wb') as f:
+            filename = f'{config.pickle_dump_file_name}.pkl'
+            eventhandler.new_status(f"Dumping parsed data to {filename}...")
+
+            with open(f'./data/{filename}', 'wb') as f:
                 stringdata = str(parsed_pages)
                 pickle.dump(stringdata, f, pickle.HIGHEST_PROTOCOL)
                 eventhandler.new_status(f'Dump successful')
@@ -57,8 +58,9 @@ def construct_graph_routine(config):
     exit_code = "Unhandled error"
 
     try:
-        eventhandler.new_status(f"Trying to read data from {config.pickle_dump_file_name}...")
-        with open(config.pickle_dump_file_name, 'rb') as f:
+        filename = f'{config.pickle_dump_file_name}.pkl'
+        eventhandler.new_status(f"Trying to read data from {filename}...")
+        with open(f'./data/{filename}', 'rb') as f:
             stringdata = pickle.load(f)
             parsed_pages = eval(stringdata)
 

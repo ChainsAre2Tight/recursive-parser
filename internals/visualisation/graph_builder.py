@@ -169,7 +169,7 @@ class GraphBuilder:
                     graph.add_node(name)
                     tp = obj.object_type
                     color = 'orange' if tp == "Unknown/Timeout" else 'red'
-                    color = 'purple' if same_website(page, name) else color
+                    color = 'purple' if same_domain(page, name) else color
 
                     nodes[name] = NodeInfo(
                         node=name,
@@ -212,7 +212,7 @@ class GraphBuilder:
         return graph, nodes
 
     @staticmethod
-    def export_graph(graph: nx.Graph, nodes: dict[NodeInfo], file_name: str = "graph.html"):
+    def export_graph(graph: nx.Graph, nodes: dict[NodeInfo], file_name: str = "graph"):
         net = pyvis.network.Network(notebook=True, font_color='#10000000', bgcolor="#222222", height=1000)
         net.barnes_hut(gravity=-15000, central_gravity=0.3, spring_length=100, spring_strength=0.05, damping=0.1,
                        overlap=0)
@@ -226,19 +226,4 @@ class GraphBuilder:
             net.add_edge(edge[0], edge[1])
 
         net.show_buttons(filter_=['physics'])
-        net.show(file_name)
-
-
-if __name__ == '__main__':
-    print(same_website(
-        'https://www.example.com/',
-        'http://example.com/'
-    ))
-    print(same_website(
-        'https://www.example.com/',
-        'https://example.ru/'
-    ))
-    print(same_website(
-        'https://www.example.com/',
-        'https://lox.example.com/'
-    ))
+        net.show(f'{file_name}.html')
