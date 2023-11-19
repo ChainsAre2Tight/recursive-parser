@@ -9,7 +9,7 @@ import time
 from internals.timeout import timeout, MyTimeout
 from internals.objects import Page
 
-from internals.visualisation.graph_builder import same_website
+from internals.parsing_utils.utils import same_domain, same_website
 from internals.parsing_utils.scrapper import Scrapper
 
 class Parser:
@@ -79,7 +79,7 @@ class Parser:
         return soup, cookies
 
     def recursive_parse(self, link, ttl: int, parsed_pages: dict[Page], sleep_time: int,
-                        known_links: dict[str], mode: str = 'normal'):
+                        known_links: dict[str], mode: str):
         if ttl > 0:
             try:
                 try:
@@ -93,6 +93,13 @@ class Parser:
                 for sub_page in page.links:
                     if mode == 'strict' and not same_website(link, sub_page):
                         continue
+                    elif mode == 'semi-strict' and not same_domain(link, sub_page):
+                        continue
+                    elif mode == 'normal':
+                        pass
+                    else:
+                        raise UnknownRequestTypeError(f'Unknown parsing mode "{mode}"')
+
                     if sub_page not in parsed_pages.keys():
                         self.recursive_parse(
                             link=sub_page,

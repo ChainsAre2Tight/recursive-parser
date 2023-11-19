@@ -29,7 +29,7 @@ def perform_parsing_routine(config):
                 parsed_pages=parsed_pages,
                 sleep_time=1,
                 known_links=known_links,
-                mode='strict',
+                mode=config.mode,
             )
             eventhandler.new_info('All clear')
             exit_code = 'Normal'

@@ -1,8 +1,7 @@
 import networkx as nx
 import pyvis.network
 from dataclasses import dataclass
-
-from internals.objects import Page, ReferencedObject
+from internals.parsing_utils.utils import same_domain
 
 
 def link_node(name):
@@ -11,19 +10,6 @@ def link_node(name):
 
 def obj_node(name):
     return f'Objects | {name}'
-
-
-def same_website(link1: str, link2: str) -> bool:
-    def transform(link: str) -> str:
-        link = link[link.find('/') + 2:]  # get rid of http:// and http://
-        link = link.strip('www.')  # get rid of www.
-        link = link.split('/')[0]  # get only host
-
-        if link.count('.') > 1:
-            link = '.'.join(link.split('.')[-2:])  # get rid of subdomains
-        return link
-
-    return transform(link1) == transform(link2)
 
 
 @dataclass
@@ -141,7 +127,7 @@ class GraphBuilder:
                 else:
                     if link not in nodes.keys():
                         graph.add_node(link)
-                        same_site = same_website(page, link)
+                        same_site = same_domain(page, link)
                         nodes[link] = NodeInfo(
                             node=link,
                             title=link,
