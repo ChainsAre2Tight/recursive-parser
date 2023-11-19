@@ -50,6 +50,15 @@ class ConfigParser:
             if type(my_config.printout) != bool:
                 raise TypeError("Printout should be either True or False")
 
+            if type(my_config.log) != bool:
+                raise TypeError("Logging should be either True or False")
+
+            if my_config.mode not in ['normal', 'semi-strict', 'strict']:
+                raise ValueError(f'Expected "normal", "semi-strict" or "strict", got: {my_config.mode}')
+
+            if type(my_config.cookies) != bool:
+                raise TypeError("Cookies should be either True or False")
+
             # return config object
             eventhandler.new_status("Successfully loaded config")
             if not my_config.printout:
