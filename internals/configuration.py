@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from internals.handlers import eventhandler
 
 from internals.exceptions import UnknownBrowserError, ConfigNotFoundError
+from internals.file_utils import construct_file_name_from_link, validate_file_name
 
 
 @dataclass
@@ -58,6 +59,28 @@ class ConfigParser:
 
             if type(my_config.cookies) != bool:
                 raise TypeError("Cookies should be either True or False")
+
+            if my_config.pickle_dump_file_name == 'auto':
+                my_config.pickle_dump_file_name = construct_file_name_from_link(
+                    my_config.start_page,
+                    f'dump-{my_config.mode}',
+                    f'l{my_config.maximum_recursion_depth}'
+                )
+                eventhandler.new_info(f'Dump file name set to Auto. New file name: "{my_config.pickle_dump_file_name}"')
+
+            if not validate_file_name(my_config.pickle_dump_file_name):
+                raise ValueError("Dump file name shouldn't contain any of the special characters, not even file format")
+
+            if my_config.graph_file_name == 'auto':
+                my_config.graph_file_name = construct_file_name_from_link(
+                    my_config.start_page,
+                    f'graph-{my_config.mode}',
+                    f'l{my_config.maximum_recursion_depth}'
+                )
+                eventhandler.new_info(f'Graph file name set to Auto. New file name: "{my_config.graph_file_name}"')
+
+            if not validate_file_name(my_config.graph_file_name):
+                raise ValueError("Graph file name shouldn't contain any of the special characters, not even file format")
 
             # return config object
             eventhandler.new_status("Successfully loaded config")

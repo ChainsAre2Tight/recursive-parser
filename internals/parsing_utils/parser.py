@@ -97,8 +97,6 @@ class Parser:
                         continue
                     elif mode == 'normal':
                         pass
-                    else:
-                        raise UnknownRequestTypeError(f'Unknown parsing mode "{mode}"')
 
                     if sub_page not in parsed_pages.keys():
                         self.recursive_parse(
