@@ -3,7 +3,7 @@ from internals.configuration import Config
 config = Config(
     start_page="https://palchevsky.ru/",
     # what page should be scanned
-    maximum_recursion_depth=1,
+    maximum_recursion_depth=3,
     # Maximum depth the parser is allowed (e.g. l1 will scan only the first page, l2 all the links found in l1 scan
     browser='Firefox',
     # Browser (Chrome or Firefox)
@@ -13,8 +13,8 @@ config = Config(
     # Whether to print all events into console
     log=True,
     # Whether to log all events to logging file
-    pickle_dump_file_name='auto',
-    graph_file_name='auto',
+    pickle_dump_file_name='pickle_xvideos',
+    graph_file_name='xvideos_graph_new',
     # File names that will be used to store data. Set to 'auto' for automatic generation based on start_page
     mode='semi-strict',
     # normal - scan all links regardless of where they might lead

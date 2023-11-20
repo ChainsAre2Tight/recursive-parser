@@ -113,7 +113,7 @@ class GraphBuilder:
                     node=name,
                     title=name,
                     color='orange',
-                    shape='triangle',
+                    shape='star',
                     size=10
                 )
                 graph.add_edge(page, name)
@@ -126,7 +126,7 @@ class GraphBuilder:
                     node=name,
                     title=name,
                     color='violet',
-                    shape='triangleDown',
+                    shape='star',
                     size=10
                 )
                 graph.add_edge(page, name)
@@ -177,16 +177,20 @@ class GraphBuilder:
                 name = obj.link
                 if name not in nodes.keys():
                     graph.add_node(name)
-                    color = 'orange'
+                    color = 'gray'
                     tp = obj.object_type
                     if 'pdf' in tp:
-                        color = 'gray'
+                        color = 'red'
                     elif 'image' in tp:
-                        color = 'white'
+                        color = 'green'
                     elif 'css' in tp:
                         color = 'blue'
-                    elif '.js' in tp:
+                    elif 'application' in tp and 'javascript' not in tp:
+                        color = 'orange'
+                    elif 'javascript' in tp:
                         color = 'yellow'
+                    elif 'text' in tp:
+                        color = 'white'
 
                     nodes[name] = NodeInfo(
                         node=name,

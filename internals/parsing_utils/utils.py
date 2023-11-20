@@ -104,7 +104,17 @@ def strip_all_get_params(parsed_pages: dict) -> dict:
         merged_cookies = self.cookies
         merged_objects = self.objects
         merged_forms = self.forms
-        merged_unreachable = self.unreachable
+
+        merged_unreachable = list()
+        for unreachable in self.unreachable:
+            merged_unreachable.append(
+                ReferencedObject(
+                    object_type=unreachable.object_type,
+                    link=strip_GET_from_link(unreachable.link)
+                )
+            )
+
+        # merged_unreachable = self.unreachable
         if new_name in result.keys() and type(result[new_name]) == Page:
             other: Page = result[new_name]
 
