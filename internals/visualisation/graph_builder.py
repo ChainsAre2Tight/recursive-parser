@@ -1,15 +1,15 @@
 import networkx as nx
 import pyvis.network
 from dataclasses import dataclass
-from internals.parsing_utils.utils import same_domain, get_directory
+from internals.parsing_utils.utils import same_domain, get_directory, strip_GET_from_link
 
 
 def link_node(name):
-    return f'Links | {name}'
+    return f'Links @ {name}'
 
 
 def obj_node(name):
-    return f'Objects | {name}'
+    return f'Objects @ {name}'
 
 
 @dataclass
@@ -24,7 +24,11 @@ class NodeInfo:
 class GraphBuilder:
 
     @staticmethod
-    def graph_from_parsed_pages(parsed_pages: dict[str], export_cookies: bool, export_directories: bool) -> tuple[
+    def graph_from_parsed_pages(
+            parsed_pages: dict[str],
+            export_cookies: bool,
+            export_directories: bool,
+    ) -> tuple[
         nx.Graph, dict[NodeInfo]]:
         graph = nx.Graph()
         nodes = dict()
@@ -36,7 +40,7 @@ class GraphBuilder:
             if type(parsed_pages[page]) == str:
                 nodes[page] = NodeInfo(
                     node=page,
-                    title=f'404 | {page}',
+                    title=f'404 @ {page}',
                     color='red',
                     shape='diamond',
                     size=30
@@ -44,9 +48,11 @@ class GraphBuilder:
                 continue
 
             color = 'purple' if '404' in str(parsed_pages[page].title) else 'blue'
+            merged = 'Merged @' in str(parsed_pages[page].title)
+            color = 'white' if merged else color
             nodes[page] = NodeInfo(
                 node=page,
-                title=f'{parsed_pages[page].title} | {page}',
+                title=f'{parsed_pages[page].title} @ {page}' if not merged else f'Merged @ {page}',
                 color=color,
                 shape='diamond',
                 size=50
@@ -76,8 +82,6 @@ class GraphBuilder:
             # add node for links
             if len(parsed_pages[page].links) > 1:
 
-                # check if all links have left unscrapped
-                # This
                 flag = True
                 for link_to_check in parsed_pages[page].links:
                     if link_to_check not in parsed_pages.keys():
@@ -110,7 +114,7 @@ class GraphBuilder:
 
             # add node for unreachable hosts
             if len(parsed_pages[page].unreachable) > 1:
-                name = f'Unreachable | {page}'
+                name = f'Unreachable @ {page}'
                 graph.add_node(name)
                 nodes[name] = NodeInfo(
                     node=name,
@@ -124,7 +128,7 @@ class GraphBuilder:
             # add node for cookies
             if export_cookies:
                 if len(parsed_pages[page].cookies) > 1:
-                    name = f'Cookies | {page}'
+                    name = f'Cookies @ {page}'
                     graph.add_node(name)
                     nodes[name] = NodeInfo(
                         node=name,
@@ -177,7 +181,7 @@ class GraphBuilder:
 
                     nodes[name] = NodeInfo(
                         node=name,
-                        title=f'{tp} | {name}',
+                        title=f'{tp} @ {name}',
                         color=color,
                         shape='dot',
                         size=20
@@ -195,17 +199,17 @@ class GraphBuilder:
 
                     nodes[name] = NodeInfo(
                         node=name,
-                        title=f'{tp} | {name}',
+                        title=f'{tp} @ {name}',
                         color=color,
                         shape='square',
                         size=20
                     )
-                graph.add_edge(f"Unreachable | {page}" if len(parsed_pages[page].unreachable) > 1 else page, name)
+                graph.add_edge(f"Unreachable @ {page}" if len(parsed_pages[page].unreachable) > 1 else page, name)
 
             # add links to cookies
             if export_cookies:
                 for i_cookie_source in range(len(parsed_pages[page].cookies)):
-                    source_name = f'{i_cookie_source} | Cookies | {page}'
+                    source_name = f'{i_cookie_source} @ Cookies @ {page}'
                     if source_name not in nodes.keys():
                         graph.add_node(source_name)
                         nodes[source_name] = NodeInfo(
@@ -215,7 +219,7 @@ class GraphBuilder:
                             shape='triangle',
                             size=20
                         )
-                        graph.add_edge(f'Cookies | {page}' if len(parsed_pages[page].cookies) > 1 else page,
+                        graph.add_edge(f'Cookies @ {page}' if len(parsed_pages[page].cookies) > 1 else page,
                                        source_name)
                         for cookie in parsed_pages[page].cookies[i_cookie_source].cookies:
                             name = f'{cookie.name} | {cookie.value}'

@@ -18,6 +18,7 @@ class Config:
     cookies: bool
     log: bool
     get_directories: bool
+    strip_GET_params: bool
 
 
 class ConfigParser:
@@ -85,6 +86,9 @@ class ConfigParser:
 
             if type(my_config.get_directories) != bool:
                 raise TypeError("get_directories should be either True or False")
+
+            if type(my_config.strip_GET_params) != bool:
+                raise TypeError("strip_GET_params should be either True or False")
 
             # return config object
             eventhandler.new_status("Successfully loaded config")

@@ -25,4 +25,5 @@ config = Config(
     # set this to False for scans all scans whose depth exceed 2 as the graph will be bloated with cookie data
     get_directories=True,
     # If set to True, graph will also group scanned pages by their directory on the websites
+    strip_GET_params=True,
 )

@@ -6,6 +6,8 @@ from internals.objects import *
 from internals.visualisation.graph_builder import GraphBuilder
 import pickle
 
+from internals.parsing_utils.utils import strip_all_get_params
+
 
 def perform_parsing_routine(config):
     eventhandler.new_status("Starting parsing routine...")
@@ -68,6 +70,13 @@ def construct_graph_routine(config):
         eventhandler.new_status(f"Successfully read dump")
         eventhandler.new_info(f"Read {num_of_pages_loaded} page{'s' if num_of_pages_loaded > 1 else ''}")
 
+        if config.strip_GET_params:
+            eventhandler.new_status("Reprocessing data and stripping all GET parameters")
+            parsed_pages = strip_all_get_params(parsed_pages)
+            eventhandler.new_status("All GET parameters successfully removed")
+            eventhandler.new_info(f"Graph reduced to {len(parsed_pages.keys())} pages")
+
+
         eventhandler.new_status(f'Building graph...')
         graph, nodes = GraphBuilder.graph_from_parsed_pages(
             parsed_pages,
@@ -84,6 +93,7 @@ def construct_graph_routine(config):
         exit_code = 'KeyboardInterrupt'
     except Exception as er:
         exit_code = f"Error: {er}"
+        raise er
     finally:
         eventhandler.new_status(f'Graph construction routine completed with exit code {exit_code}')
 
