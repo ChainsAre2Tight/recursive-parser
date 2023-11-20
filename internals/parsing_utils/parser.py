@@ -12,6 +12,7 @@ from internals.objects import Page
 from internals.parsing_utils.utils import same_domain, same_website
 from internals.parsing_utils.scrapper import Scrapper
 
+
 class Parser:
 
     def __init__(self, browser: str, wait_time: int):

@@ -1,7 +1,7 @@
 import networkx as nx
 import pyvis.network
 from dataclasses import dataclass
-from internals.parsing_utils.utils import same_domain
+from internals.parsing_utils.utils import same_domain, get_directory
 
 
 def link_node(name):
@@ -24,7 +24,8 @@ class NodeInfo:
 class GraphBuilder:
 
     @staticmethod
-    def graph_from_parsed_pages(parsed_pages: dict[str], export_cookies: bool) -> tuple[nx.Graph, dict[NodeInfo]]:
+    def graph_from_parsed_pages(parsed_pages: dict[str], export_cookies: bool, export_directories: bool) -> tuple[
+        nx.Graph, dict[NodeInfo]]:
         graph = nx.Graph()
         nodes = dict()
 
@@ -35,10 +36,10 @@ class GraphBuilder:
             if type(parsed_pages[page]) == str:
                 nodes[page] = NodeInfo(
                     node=page,
-                    title=f'Unreachable | {page}',
+                    title=f'404 | {page}',
                     color='red',
                     shape='diamond',
-                    size=50
+                    size=30
                 )
                 continue
 
@@ -50,6 +51,27 @@ class GraphBuilder:
                 shape='diamond',
                 size=50
             )
+
+            # add node for directory
+            if export_directories:
+                dirname = page
+
+                while True:
+                    prev = dirname
+                    dirname = get_directory(dirname)
+                    if prev == dirname:
+                        break
+                    if dirname not in nodes.keys():
+                        graph.add_node(dirname)
+
+                        nodes[dirname] = NodeInfo(
+                            node=dirname,
+                            title=dirname,
+                            color='pink',
+                            shape='star',
+                            size=40
+                        )
+                    graph.add_edge(prev, dirname)
 
             # add node for links
             if len(parsed_pages[page].links) > 1:
@@ -219,10 +241,12 @@ class GraphBuilder:
 
         # Construct nodes
         for link, node in nodes.items():
+            # print(node)
             net.add_node(node.node, color=node.color, shape=node.shape, title=node.title, size=node.size)
 
         # link them
         for edge in graph.edges:
+            # print(edge)
             net.add_edge(edge[0], edge[1])
 
         net.show_buttons(filter_=['physics'])

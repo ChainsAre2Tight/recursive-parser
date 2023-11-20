@@ -17,6 +17,7 @@ class Config:
     pickle_dump_file_name: str
     cookies: bool
     log: bool
+    get_directories: bool
 
 
 class ConfigParser:
@@ -81,6 +82,9 @@ class ConfigParser:
 
             if not validate_file_name(my_config.graph_file_name):
                 raise ValueError("Graph file name shouldn't contain any of the special characters, not even file format")
+
+            if type(my_config.get_directories) != bool:
+                raise TypeError("get_directories should be either True or False")
 
             # return config object
             eventhandler.new_status("Successfully loaded config")
