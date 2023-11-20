@@ -1,7 +1,7 @@
 import networkx as nx
 import pyvis.network
 from dataclasses import dataclass
-from internals.parsing_utils.utils import same_domain, get_directory, strip_GET_from_link
+from internals.parsing_utils.utils import same_domain, get_directory
 
 
 def link_node(name):
@@ -10,6 +10,27 @@ def link_node(name):
 
 def obj_node(name):
     return f'Objects @ {name}'
+
+
+def add_directory(nodes: dict, graph: nx.Graph, page):
+    dirname = page
+
+    while True:
+        prev = dirname
+        dirname = get_directory(dirname)
+        if prev == dirname:
+            break
+        if dirname not in nodes.keys():
+            graph.add_node(dirname)
+
+            nodes[dirname] = NodeInfo(
+                node=dirname,
+                title=dirname,
+                color='pink',
+                shape='star',
+                size=40
+            )
+        graph.add_edge(prev, dirname)
 
 
 @dataclass
@@ -28,6 +49,7 @@ class GraphBuilder:
             parsed_pages: dict[str],
             export_cookies: bool,
             export_directories: bool,
+            start_page: str,
     ) -> tuple[
         nx.Graph, dict[NodeInfo]]:
         graph = nx.Graph()
@@ -43,7 +65,7 @@ class GraphBuilder:
                     title=f'404 @ {page}',
                     color='red',
                     shape='diamond',
-                    size=30
+                    size=50
                 )
                 continue
 
@@ -55,29 +77,13 @@ class GraphBuilder:
                 title=f'{parsed_pages[page].title} @ {page}' if not merged else f'Merged @ {page}',
                 color=color,
                 shape='diamond',
-                size=50
+                size=30
             )
 
             # add node for directory
-            if export_directories:
-                dirname = page
 
-                while True:
-                    prev = dirname
-                    dirname = get_directory(dirname)
-                    if prev == dirname:
-                        break
-                    if dirname not in nodes.keys():
-                        graph.add_node(dirname)
-
-                        nodes[dirname] = NodeInfo(
-                            node=dirname,
-                            title=dirname,
-                            color='pink',
-                            shape='star',
-                            size=40
-                        )
-                    graph.add_edge(prev, dirname)
+            if export_directories and same_domain(start_page, page):
+                add_directory(nodes, graph, page)
 
             # add node for links
             if len(parsed_pages[page].links) > 1:
@@ -163,6 +169,9 @@ class GraphBuilder:
                         )
                     graph.add_edge(link_node(page) if len(parsed_pages[page].links) > 1 else page, link)
 
+                    if export_directories and same_domain(start_page, link):
+                        add_directory(nodes, graph, link)
+
             # add links to objects
             for obj in parsed_pages[page].objects:
                 name = obj.link
@@ -188,6 +197,9 @@ class GraphBuilder:
                     )
                 graph.add_edge(obj_node(page) if len(parsed_pages[page].objects) > 1 else page, name)
 
+                if export_directories and same_domain(start_page, name):
+                    add_directory(nodes, graph, name)
+
             # add links to unreachable pages
             for obj in parsed_pages[page].unreachable:
                 name = obj.link
@@ -205,6 +217,9 @@ class GraphBuilder:
                         size=20
                     )
                 graph.add_edge(f"Unreachable @ {page}" if len(parsed_pages[page].unreachable) > 1 else page, name)
+
+                if export_directories and same_domain(start_page, name):
+                    add_directory(nodes, graph, name)
 
             # add links to cookies
             if export_cookies:
@@ -250,8 +265,8 @@ class GraphBuilder:
 
         # link them
         for edge in graph.edges:
-            # print(edge)
-            net.add_edge(edge[0], edge[1])
+            if edge[0] != edge[1]:
+                net.add_edge(edge[0], edge[1])
 
         net.show_buttons(filter_=['physics'])
         net.show(f'{file_name}.html')

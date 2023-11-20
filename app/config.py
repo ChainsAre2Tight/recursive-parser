@@ -3,7 +3,7 @@ from internals.configuration import Config
 config = Config(
     start_page="https://palchevsky.ru/",
     # what page should be scanned
-    maximum_recursion_depth=3,
+    maximum_recursion_depth=1,
     # Maximum depth the parser is allowed (e.g. l1 will scan only the first page, l2 all the links found in l1 scan
     browser='Firefox',
     # Browser (Chrome or Firefox)

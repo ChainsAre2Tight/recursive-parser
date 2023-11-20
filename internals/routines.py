@@ -52,6 +52,7 @@ def perform_parsing_routine(config):
     except KeyboardInterrupt:
         exit_code = 'KeyboardInterrupt'
     finally:
+        del parser
         eventhandler.new_status(f'Parsing routine completed with exit code {exit_code}')
 
 
@@ -82,6 +83,7 @@ def construct_graph_routine(config):
             parsed_pages,
             export_cookies=config.cookies,
             export_directories=config.get_directories,
+            start_page=config.start_page,
         )
         eventhandler.new_status("Graph successfully built")
 

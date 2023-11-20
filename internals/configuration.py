@@ -77,7 +77,7 @@ class ConfigParser:
                 my_config.graph_file_name = construct_file_name_from_link(
                     my_config.start_page,
                     f'graph-{my_config.mode}',
-                    f'l{my_config.maximum_recursion_depth}'
+                    f'l{my_config.maximum_recursion_depth}{"-merged" if my_config.strip_GET_params else ""}'
                 )
                 eventhandler.new_info(f'Graph file name set to Auto. New file name: "{my_config.graph_file_name}"')
 
