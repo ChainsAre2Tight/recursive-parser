@@ -1,0 +1,8 @@
+services:
+  scrapper:
+    image: selenium-webdriver
+    build:
+      dockerfile: docker/Dockerfile
+    volumes:
+      - .:/app
+    command: bash -c "python main.py both"
