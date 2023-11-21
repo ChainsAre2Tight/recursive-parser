@@ -22,6 +22,7 @@ class Parser:
         def set_options(options_obj):
             pass
             options_obj.add_argument('--headless')
+            options_obj.add_argument('--no-sandbox')
             # options_obj.add_argument('window-size=1920x1080')
             # options_obj.add_argument("disable-gpu")
 
