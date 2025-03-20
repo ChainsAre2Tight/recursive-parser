@@ -50,5 +50,5 @@ The `config.py` file contains all the settings for the parser and graph generati
 
 ## Additional Information
 
-For more details on project configuration and execution, see the [main README](README.md).
+For more details on project configuration and execution, see the [main README](../README.md).
 
