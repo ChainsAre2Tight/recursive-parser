@@ -49,5 +49,5 @@ The configuration file is located in `/app/config.py` and allows customization o
 - `mode = strict` is recommended for the initial stage. Switch to `semi-strict` when expanding parsing boundaries. Use `normal` mode only if there are no social media links in the graph.
 - Adjust `wait_time` based on your internet speed: lower values for fast connections, higher values for slow networks.
 
-For detailed configuration explanations, see the [config README](app/config_readme.md).
+For detailed configuration explanations, see the [config README](app/readme.md).
 
